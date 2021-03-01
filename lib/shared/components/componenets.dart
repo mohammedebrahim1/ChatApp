@@ -1,5 +1,7 @@
 
 
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +87,147 @@ Widget receiverBuildItem (data) => Padding(
     ],
   ),
 );
+Widget senderVoiceItem (data , function , icon , audio , duration , totalDuration)  => Padding(
+    padding: const EdgeInsetsDirectional.only(
+        top: 15.0, bottom: 15.0, start: 70.0, end: 10.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          data['timestamp'],
+          style: TextStyle(color: Colors.black),
+        ),
+        SizedBox(
+          width: 15.0,
+        ),
+        Container(
+          width: 250.0,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(data['sender_image']??'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png'),
+                      radius: 25.0,
+                    ),
+                    Positioned(child: Icon(Icons.mic , color: Colors.lightBlue,) , left:33.0,),
+                  ],
+                ),
+
+                InkWell(child: icon , onTap: function,),
+                SizedBox(width: 8.0,),
+                Padding(
+                  padding: const EdgeInsets.only(top: 14.0),
+                  child: Container(
+                    width: 150.0,
+                    child: ProgressBar(
+                      progress: duration,
+
+                      total: totalDuration,
+                      timeLabelLocation: TimeLabelLocation.below,
+                      thumbRadius: 6.0,
+                      onSeek: (duration)
+                      {
+                        audio.seek(duration);
+                      },
+
+
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15.0),
+              topRight: Radius.circular(15.0),
+              bottomRight: Radius.circular(0.0),
+              bottomLeft: Radius.circular(15.0),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+Widget receiverVoiceItem (data) => Padding(
+  padding: const EdgeInsetsDirectional.only(top: 15.0 , bottom: 15.0 , start: 10.0 , end: 100.0),
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      Container(
+        width: 250.0,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              InkWell(child: Icon(Icons.play_arrow , size: 24.0,) , onTap: ()async{
+                await AudioPlayer().play(data['voice_note']);
+
+              },),
+              SizedBox(width: 8.0,),
+              Padding(
+                padding: const EdgeInsets.only(top: 14.0,),
+                child: Container(
+                  width: 150.0,
+
+                  child: ProgressBar(
+                    progress: Duration(minutes: 0),
+                    total: Duration(minutes: 10),
+                    timeLabelLocation: TimeLabelLocation.below,
+                    thumbRadius: 6.0,
+
+
+                  ),
+                ),
+              ),
+              Stack(
+                alignment: Alignment.bottomLeft,
+                children: [
+
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(data['receiver_image']??'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png'),
+                    radius: 25.0,
+                  ),
+                  Positioned(child: Icon(Icons.mic , color: Colors.lightBlue,) , right:32.0,),
+                ],
+              ),
+
+            ],
+          ),
+        ),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15.0),
+            topRight: Radius.circular(15.0),
+            bottomRight: Radius.circular(15.0),
+            bottomLeft: Radius.circular(0.0),
+          ),
+        ),
+      ),
+      SizedBox(
+        width: 15.0,
+      ),
+      Text(
+        data['timestamp'],
+        style: TextStyle(color: Colors.black),
+      ),
+
+    ],
+  ),
+);
+
 Widget userBuildItem (data) =>  Padding(
   padding: const EdgeInsets.all(10.0),
   child: Row(

@@ -45,6 +45,8 @@ dependencies:
   audio_recorder: ^1.0.2
   path_provider: ^1.6.27
   audioplayers: ^0.17.3
+  audio_video_progress_bar: ^0.1.0
+  rxdart: ^0.25.0
   intl: ^0.16.1
 
 dev_dependencies:

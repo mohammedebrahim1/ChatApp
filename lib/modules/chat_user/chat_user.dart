@@ -1,3 +1,5 @@
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_app/modules/chat_user/cubit/cubit.dart';
 import 'package:chat_app/shared/components/componenets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,6 +30,8 @@ class ChatUserScreen extends StatelessWidget {
           Map data = ChatUserCubit.get(context).data;
           List messages = ChatUserCubit.get(context).messages;
           var messageController = ChatUserCubit.get(context).messageController;
+          AudioPlayer audio = ChatUserCubit.get(context).audio;
+
 
           return Scaffold(
             appBar: AppBar(
@@ -97,19 +101,46 @@ class ChatUserScreen extends StatelessWidget {
                           .snapshots(),
                       builder: (context, snapshot) {
                         return ListView.builder(
-                          itemBuilder: (BuildContext context, int index) {
+                          itemBuilder: (BuildContext context, int index)  {
                             if (messages[index]['sender_id'] ==
-                                FirebaseAuth.instance.currentUser.uid)
+                                FirebaseAuth.instance.currentUser.uid && messages[index]['message'] == 'no_text' ){
+                              ChatUserCubit.get(context).getPosition();
+                              ChatUserCubit.get(context).changePosition();
+
+                              return senderVoiceItem(messages[index] , ()async{
+                                print('plaaaaay');
+                                ChatUserCubit.get(context).changePauseAudioIcon();
+
+                                await audio.play(messages[index]['voice_note']).then((value) {
+                                  audio.onPlayerCompletion.listen((event) {
+                                    ChatUserCubit.get(context).changePlayAudioIcon();
+                                    ChatUserCubit.get(context).duration = Duration(seconds: 0);
+
+                                  });
+                                });
+
+
+                              } , ChatUserCubit.get(context).audioWidget,audio , ChatUserCubit.get(context).duration,ChatUserCubit.get(context).totalDuration,);}
+                            else if (messages[index]['sender_id'] ==
+                                FirebaseAuth.instance.currentUser.uid && messages[index]['message'] != 'no_text') {
                               return senderBuildItem(messages[index]);
-                            else {
-                              return receiverBuildItem(messages[index]);
                             }
+                            else if (messages[index]['sender_id'] !=
+                                FirebaseAuth.instance.currentUser.uid && messages[index]['message'] == 'no_text' )
+                            {
+                              return receiverVoiceItem(messages[index]);
+                            }
+                            else
+                              {
+                                return receiverBuildItem(messages[index]);
+                              }
                           },
                           itemCount: messages.length,
                           shrinkWrap: true,
                         );
                       }),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.all(5.0),
                   child: Row(
@@ -157,25 +188,45 @@ class ChatUserScreen extends StatelessWidget {
                       SizedBox(
                         width: 5.0,
                       ),
-                      Column(
-                        children: [
-                          FloatingActionButton(
-                            heroTag: 'btn1',
-                            onPressed: () {
-                              ChatUserCubit.get(context).start(context: context);
-                              ChatUserCubit.get(context).createChat();
-                            },
-                            child: Icon(Icons.mic),
-                          ),
-                          FloatingActionButton(
-                            heroTag: 'btn2',
+                      // FloatingActionButton(
+                      //   onPressed: () {
+                      //     ChatUserCubit.get(context)
+                      //         .sendMessage(messageController.text);
+                      //     ChatUserCubit.get(context).createChat();
+                      //   },
+                      //   child: ChatUserCubit.get(context).myWidget,
+                      // ),
 
-                            onPressed: () {
-                              ChatUserCubit.get(context).stop();
-                            },
-                            child: Icon(Icons.stop),
+                      GestureDetector(
+                        onTap: ()
+                        {
+                          ChatUserCubit.get(context).sendMessage(message:messageController.text ,);
+                          ChatUserCubit.get(context).createChat();
+                        },
+                        onLongPressStart: (value)
+                        {
+                          // if (ChatUserCubit.get(context).myWidget ==
+                          //     Icon(Icons.mic) && ChatUserCubit.get(context).messageController.text == "") {
+                          //   ChatUserCubit.get(context).start(context: context);
+                          //   ChatUserCubit.get(context).createChat();
+                          // }
+
+                            ChatUserCubit.get(context).start(context: context);
+                            ChatUserCubit.get(context).createChat();
+                        },
+                        onLongPressUp:()
+                        {
+                          ChatUserCubit.get(context).stop();
+                        } ,
+                        child: Container(
+                          height: 55.0,
+                          width: 55.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.lightBlue,
                           ),
-                        ],
+                          child:ChatUserCubit.get(context).myWidget,
+                        ),
                       ),
                     ],
                   ),
